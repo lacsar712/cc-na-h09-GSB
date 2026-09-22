@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>登记巡检</h1>
+{% if error %}<p class="err">{{ error }}</p>{% endif %}
+<p class="hint">灯号可留空或只填空格，系统会自动补号。</p>
+<form class="card" method="post" action="{% url 'create' %}" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="entry" value="form" />
+  <label>航标编号</label>
+  <input name="aid_code" placeholder="可留空自动编号" />
+  <label>实测光强（坎德拉）</label>
+  <input name="measured_cd" type="number" step="0.1" />
+  <label>要求光强</label>
+  <input name="required_cd" type="number" step="0.1" value="1200" />
+  <label>方位偏差（度）</label>
+  <input name="bearing_error_deg" type="number" step="0.1" value="0" />
+  <button type="submit" name="via" value="form">提交</button>
+</form>
+<form class="card" method="post" action="{% url 'create' %}" novalidate style="margin-top:16px">
+  {% csrf_token %}
+  <input type="hidden" name="entry" value="direct" />
+  <p>直接提交通道（同样可留空）</p>
+  <label>航标编号</label>
+  <input name="aid_code" placeholder="可留空自动编号" />
+  <label>实测光强（坎德拉）</label>
+  <input name="measured_cd" type="number" step="0.1" />
+  <label>要求光强</label>
+  <input name="required_cd" type="number" step="0.1" value="1200" />
+  <label>方位偏差（度）</label>
+  <input name="bearing_error_deg" type="number" step="0.1" value="0" />
+  <button type="submit" name="via" value="direct">直接提交</button>
+</form>
+{% endblock %}
