@@ -2,12 +2,12 @@
 {% block body %}
 <h1>登记巡检</h1>
 {% if error %}<p class="err">{{ error }}</p>{% endif %}
-<p class="hint">灯号可留空或只填空格，系统会自动补号。</p>
+<p class="hint">灯号必填，留空或只填空格会被拒绝。</p>
 <form class="card" method="post" action="{% url 'create' %}" novalidate>
   {% csrf_token %}
   <input type="hidden" name="entry" value="form" />
   <label>航标编号</label>
-  <input name="aid_code" placeholder="可留空自动编号" />
+  <input name="aid_code" placeholder="必填，如 LH-03" />
   <label>实测光强（坎德拉）</label>
   <input name="measured_cd" type="number" step="0.1" />
   <label>要求光强</label>
@@ -19,9 +19,9 @@
 <form class="card" method="post" action="{% url 'create' %}" novalidate style="margin-top:16px">
   {% csrf_token %}
   <input type="hidden" name="entry" value="direct" />
-  <p>直接提交通道（同样可留空）</p>
+  <p>直接提交通道（灯号同样必填）</p>
   <label>航标编号</label>
-  <input name="aid_code" placeholder="可留空自动编号" />
+  <input name="aid_code" placeholder="必填，如 LH-03" />
   <label>实测光强（坎德拉）</label>
   <input name="measured_cd" type="number" step="0.1" />
   <label>要求光强</label>

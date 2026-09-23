@@ -4,11 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
 from inspection.models import Inspection
-from inspection.blank_code_bypass import (
-    accept_blank_on_direct,
-    accept_blank_on_form,
-    fill_if_blank,
-)
+from inspection.blank_code_bypass import should_reject
 from inspection.rules import judge
 
 
@@ -71,16 +67,9 @@ def create_view(request):
             measured = float(request.POST["measured_cd"])
             required = float(request.POST["required_cd"])
             bearing = float(request.POST["bearing_error_deg"])
-            raw_code = request.POST.get("aid_code", "")
-            entry = (request.POST.get("entry") or request.POST.get("via") or "form").strip()
-            allow = accept_blank_on_direct() if entry == "direct" else accept_blank_on_form()
-            if allow:
-                existing = list(Inspection.objects.values_list("aid_code", flat=True))
-                code, _meta = fill_if_blank(raw_code, existing)
-            else:
-                code = str(raw_code).strip()
-                if not code:
-                    raise ValueError("empty")
+            code = str(request.POST.get("aid_code", "")).strip()
+            if should_reject(code):
+                raise ValueError("empty")
         except (KeyError, ValueError):
             error = "请填编号和三项数值"
         else:
