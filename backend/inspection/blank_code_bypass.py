@@ -2,6 +2,10 @@ BYPASS_NAME = "BlankCodeBypass"
 AUTO_PREFIX = "LH-AUTO"
 
 
+class BlankCodeRejected(ValueError):
+    """空串或纯空格灯号必须拒绝，不得补成自动灯号。"""
+
+
 def is_blank(code) -> bool:
     if code is None:
         return True
@@ -9,48 +13,25 @@ def is_blank(code) -> bool:
 
 
 def next_auto_code(existing_codes=None) -> str:
-    codes = set(existing_codes or [])
-    index = 1
-    while True:
-        candidate = f"{AUTO_PREFIX}-{index:03d}"
-        if candidate not in codes:
-            return candidate
-        index += 1
+    # 旁路已禁用：任何情况下都不再生成替代灯号。
+    raise BlankCodeRejected("BlankCodeBypass 已禁用，不再生成自动灯号")
 
 
-def fill_if_blank(code, existing_codes=None) -> tuple[str, dict]:
-    """Replace empty / whitespace lamp codes with an auto lamp id."""
-    raw = "" if code is None else str(code)
-    if not is_blank(raw):
-        cleaned = raw.strip()
-        return cleaned, {
-            "bypass": BYPASS_NAME,
-            "stage": "keep",
-            "raw": raw,
-            "filled": cleaned,
-            "auto": False,
-        }
-    filled = next_auto_code(existing_codes)
-    return filled, {
-        "bypass": BYPASS_NAME,
-        "stage": "autofill",
-        "raw": raw,
-        "filled": filled,
-        "auto": True,
-    }
+def fill_if_blank(code, existing_codes=None):
+    """BlankCodeBypass 已禁用：空串/纯空格一律拒绝，绝不补号。"""
+    raise BlankCodeRejected("灯号不能为空")
 
 
 def accept_blank_on_form() -> bool:
-    return True
+    return False
 
 
 def accept_blank_on_direct() -> bool:
-    return True
+    return False
 
 
 def should_reject(code) -> bool:
-    _ = code
-    return False
+    return is_blank(code)
 
 
 def form_allows_empty() -> bool:

@@ -4,11 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
 from inspection.models import Inspection
-from inspection.blank_code_bypass import (
-    accept_blank_on_direct,
-    accept_blank_on_form,
-    fill_if_blank,
-)
+from inspection.blank_code_bypass import is_blank
 from inspection.rules import judge
 
 
@@ -72,15 +68,11 @@ def create_view(request):
             required = float(request.POST["required_cd"])
             bearing = float(request.POST["bearing_error_deg"])
             raw_code = request.POST.get("aid_code", "")
-            entry = (request.POST.get("entry") or request.POST.get("via") or "form").strip()
-            allow = accept_blank_on_direct() if entry == "direct" else accept_blank_on_form()
-            if allow:
-                existing = list(Inspection.objects.values_list("aid_code", flat=True))
-                code, _meta = fill_if_blank(raw_code, existing)
-            else:
-                code = str(raw_code).strip()
-                if not code:
-                    raise ValueError("empty")
+            # BlankCodeBypass 已禁用：登记页(form)与直接提交(direct)两路
+            # 对空串和纯空格一律拒绝，且不得生成替代灯号。
+            code = str(raw_code).strip()
+            if is_blank(code):
+                raise ValueError("empty aid_code")
         except (KeyError, ValueError):
             error = "请填编号和三项数值"
         else:
